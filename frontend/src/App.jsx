@@ -1,6 +1,53 @@
 import { useEffect, useMemo, useState } from "react";
 
 const categories = ["All", "Tees", "Hoodies", "Bottoms"];
+const whatsappNumber = "254794933970";
+const previewProducts = [
+  {
+    id: 1,
+    name: "Made New heavyweight tee",
+    category: "Tees",
+    price: 2400,
+    badge: "Best seller",
+    image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=85",
+    image_alt: "Cream heavyweight t-shirt",
+    back_image: "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=900&q=85",
+    back_image_alt: "Demo back-view image for heavyweight tee",
+  },
+  {
+    id: 2,
+    name: "Walk by Faith hoodie",
+    category: "Hoodies",
+    price: 4800,
+    badge: "New drop",
+    image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=900&q=85",
+    image_alt: "Relaxed fit hoodie",
+    back_image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=900&q=85",
+    back_image_alt: "Demo back-view image for hoodie",
+  },
+  {
+    id: 3,
+    name: "Grace oversized tee",
+    category: "Tees",
+    price: 2200,
+    badge: "",
+    image: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=900&q=85",
+    image_alt: "Minimal streetwear t-shirt",
+    back_image: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=900&q=85",
+    back_image_alt: "Demo back-view image for oversized tee",
+  },
+  {
+    id: 4,
+    name: "Kingdom cargo pants",
+    category: "Bottoms",
+    price: 3900,
+    badge: "Limited",
+    image: "https://images.unsplash.com/photo-1517438476312-10d79c077509?auto=format&fit=crop&w=900&q=85",
+    image_alt: "Relaxed utility trousers",
+    back_image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=900&q=85",
+    back_image_alt: "Demo back-view image for cargo pants",
+  },
+];
 
 function Icon({ name, size = 20 }) {
   const paths = {
@@ -9,6 +56,8 @@ function Icon({ name, size = 20 }) {
     menu: <><path d="M4 7h16" /><path d="M4 12h16" /><path d="M4 17h16" /></>,
     close: <><path d="m6 6 12 12" /><path d="M18 6 6 18" /></>,
     plus: <><path d="M12 5v14" /><path d="M5 12h14" /></>,
+    minus: <path d="M5 12h14" />,
+    rotate: <><path d="M20 7v5h-5" /><path d="M4 17v-5h5" /><path d="M5.6 9A7 7 0 0 1 17.5 6L20 12" /><path d="M18.4 15A7 7 0 0 1 6.5 18L4 12" /></>,
   };
   return (
     <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
@@ -20,11 +69,13 @@ function Icon({ name, size = 20 }) {
 function App() {
   const [products, setProducts] = useState([]);
   const [activeCategory, setActiveCategory] = useState("All");
-  const [cartCount, setCartCount] = useState(0);
+  const [cart, setCart] = useState({});
+  const [cartOpen, setCartOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [usingPreview, setUsingPreview] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [notice, setNotice] = useState("");
+  const [flippedProducts, setFlippedProducts] = useState({});
 
   useEffect(() => {
     let active = true;
@@ -34,10 +85,13 @@ function App() {
         return response.json();
       })
       .then((data) => {
-        if (active) setProducts(data.results);
+        if (active) setProducts(Array.isArray(data.results) ? data.results : previewProducts);
       })
       .catch(() => {
-        if (active) setError("We couldn't load the collection. Check that the Django API is running, then refresh.");
+        if (active) {
+          setProducts(previewProducts);
+          setUsingPreview(true);
+        }
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -53,11 +107,49 @@ function App() {
       : products.filter((product) => product.category === activeCategory),
     [activeCategory, products],
   );
+  const cartItems = useMemo(
+    () => products
+      .filter((product) => cart[product.id])
+      .map((product) => ({ ...product, quantity: cart[product.id] })),
+    [cart, products],
+  );
+  const cartCount = Object.values(cart).reduce((total, quantity) => total + quantity, 0);
+  const cartTotal = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
 
   function addToBag(product) {
-    setCartCount((count) => count + 1);
+    setCart((items) => ({ ...items, [product.id]: (items[product.id] || 0) + 1 }));
     setNotice(`${product.name} added to your bag`);
     window.setTimeout(() => setNotice(""), 2400);
+  }
+
+  function toggleProductSide(productId) {
+    setFlippedProducts((flipped) => ({ ...flipped, [productId]: !flipped[productId] }));
+  }
+
+  function changeQuantity(productId, amount) {
+    setCart((items) => {
+      const quantity = (items[productId] || 0) + amount;
+      if (quantity <= 0) {
+        const nextItems = { ...items };
+        delete nextItems[productId];
+        return nextItems;
+      }
+      return { ...items, [productId]: quantity };
+    });
+  }
+
+  function getWhatsAppOrderUrl() {
+    const lines = cartItems.map((item) =>
+      `${item.name} x${item.quantity} — KES ${(item.price * item.quantity).toLocaleString("en-KE")}`,
+    );
+    const message = [
+      "Hello DopeForChrist Collection, I'd like to place this order:",
+      "",
+      ...lines,
+      "",
+      `Total: KES ${cartTotal.toLocaleString("en-KE")}`,
+    ].join("\n");
+    return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
   }
 
   function closeMenu() {
@@ -81,7 +173,7 @@ function App() {
           <a href="#story" onClick={closeMenu}>Our story</a>
           <a href="#values" onClick={closeMenu}>Our values</a>
         </nav>
-        <button className="bag-button" type="button" aria-label={`Shopping bag, ${cartCount} items`}>
+        <button className="bag-button" type="button" onClick={() => setCartOpen(true)} aria-label={`Shopping bag, ${cartCount} items`}>
           <Icon name="bag" />
           <span className="bag-label">Bag</span>
           <span className="bag-count">{cartCount}</span>
@@ -133,15 +225,30 @@ function App() {
             </div>
             <span className="product-total">Showing {visibleProducts.length} pieces</span>
           </div>
-          {error ? <div className="catalog-message error-message">{error}</div> : loading ? (
+          {loading ? (
             <div className="catalog-message">Loading the collection<span className="loading-dots">...</span></div>
           ) : visibleProducts.length ? (
             <div className="product-grid">
               {visibleProducts.map((product, index) => (
                 <article className="product-card" key={product.id}>
                   <div className="product-photo-wrap">
-                    <img className="product-photo" src={product.image} alt={product.image_alt} loading="lazy" />
+                    <div className={`product-image-flip${flippedProducts[product.id] ? " is-flipped" : ""}`}>
+                      <div className="product-flip-face product-flip-front" aria-hidden={Boolean(flippedProducts[product.id])}>
+                        <img className="product-photo" src={product.image} alt={product.image_alt} loading="lazy" />
+                      </div>
+                      {product.back_image && (
+                        <div className="product-flip-face product-flip-back" aria-hidden={!flippedProducts[product.id]}>
+                          <img className="product-photo" src={product.back_image} alt={product.back_image_alt || `Back view of ${product.name}`} loading="lazy" />
+                        </div>
+                      )}
+                    </div>
                     {product.badge && <span className="product-badge">{product.badge}</span>}
+                    {product.back_image && (
+                      <button className="view-side-button" type="button" onClick={() => toggleProductSide(product.id)} aria-pressed={Boolean(flippedProducts[product.id])} aria-label={`${flippedProducts[product.id] ? "Show front" : "Show back"} of ${product.name}`}>
+                        <Icon name="rotate" size={15} />
+                        {flippedProducts[product.id] ? "See front" : "See back"}
+                      </button>
+                    )}
                     <button className="quick-add" type="button" onClick={() => addToBag(product)} aria-label={`Add ${product.name} to bag`}>
                       <Icon name="plus" size={19} />
                     </button>
@@ -155,7 +262,7 @@ function App() {
               ))}
             </div>
           ) : <div className="catalog-message">No pieces in this category just yet.</div>}
-          <div className="collection-footnote"><span>✳</span> Demo prices and photography — your collection is coming soon.</div>
+          <div className="collection-footnote"><span>✳</span> {usingPreview ? "Preview catalog (API offline) · Demo images — replace with your actual front and back photos." : "Demo prices and photography — replace with your actual front and back product images."}</div>
         </section>
 
         <section className="story" id="story">
@@ -176,8 +283,54 @@ function App() {
       <footer className="site-footer">
         <a className="footer-brand" href="#home">DFC<span>®</span></a>
         <p>Faith in every thread. © 2026 DopeForChrist Collection</p>
-        <div className="footer-links"><a href="https://www.instagram.com/dopeforchristcollections/" target="_blank" rel="noreferrer">Instagram ↗</a><a href="https://wa.me/254794933970" target="_blank" rel="noreferrer">WhatsApp ↗</a></div>
+        <div className="footer-links"><a href="https://www.instagram.com/dopeforchristcollections/" target="_blank" rel="noreferrer">Instagram ↗</a></div>
       </footer>
+      {cartOpen && (
+        <div className="cart-overlay" onClick={() => setCartOpen(false)}>
+          <aside className="cart-panel" role="dialog" aria-modal="true" aria-labelledby="cart-title" onClick={(event) => event.stopPropagation()}>
+            <div className="cart-header">
+              <div><p className="eyebrow"><span className="eyebrow-line" /> Your selection</p><h2 id="cart-title">Your bag <span>({cartCount})</span></h2></div>
+              <button className="cart-close" type="button" onClick={() => setCartOpen(false)} aria-label="Close cart"><Icon name="close" /></button>
+            </div>
+            {cartItems.length ? (
+              <>
+                <div className="cart-items">
+                  {cartItems.map((item) => (
+                    <article className="cart-item" key={item.id}>
+                      <img src={item.image} alt={item.image_alt} />
+                      <div className="cart-item-details">
+                        <p className="product-category">{item.category}</p>
+                        <h3>{item.name}</h3>
+                        <p className="cart-item-price">KES {(item.price * item.quantity).toLocaleString("en-KE")}</p>
+                        <div className="quantity-control" aria-label={`Quantity for ${item.name}`}>
+                          <button type="button" onClick={() => changeQuantity(item.id, -1)} aria-label={`Decrease ${item.name} quantity`}><Icon name="minus" size={15} /></button>
+                          <span>{item.quantity}</span>
+                          <button type="button" onClick={() => changeQuantity(item.id, 1)} aria-label={`Increase ${item.name} quantity`}><Icon name="plus" size={15} /></button>
+                        </div>
+                      </div>
+                      <button className="cart-remove" type="button" onClick={() => changeQuantity(item.id, -item.quantity)}>Remove</button>
+                    </article>
+                  ))}
+                </div>
+                <div className="cart-summary">
+                  <div><span>Subtotal</span><strong>KES {cartTotal.toLocaleString("en-KE")}</strong></div>
+                  <p>Delivery details can be confirmed when you message us.</p>
+                  <a className="button button-dark whatsapp-order" href={getWhatsAppOrderUrl()} target="_blank" rel="noreferrer">
+                    Order via WhatsApp <Icon name="arrow" size={17} />
+                  </a>
+                </div>
+              </>
+            ) : (
+              <div className="cart-empty">
+                <Icon name="bag" size={30} />
+                <h3>Your bag is waiting.</h3>
+                <p>Add a piece from the collection to get started.</p>
+                <button className="button button-dark" type="button" onClick={() => setCartOpen(false)}>Continue shopping <Icon name="arrow" size={17} /></button>
+              </div>
+            )}
+          </aside>
+        </div>
+      )}
       {notice && <div className="toast" role="status">{notice}</div>}
     </>
   );
