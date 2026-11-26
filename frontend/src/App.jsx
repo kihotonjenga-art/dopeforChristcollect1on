@@ -89,6 +89,18 @@ const previewProducts = [
     back_image: "/products/milele-maombi-graphic-tee-back.jpeg",
     back_image_alt: "White graphic tee with MAOMBI prayer illustration on the back",
   },
+  {
+    id: 8,
+    name: "Kuja Kwa Yesu graphic tee",
+    category: "Tees",
+    price: 1500,
+    sizes: standardSizes,
+    badge: "New drop",
+    image: "/products/kuja-kwa-yesu-tee-front.jpeg",
+    image_alt: "Charcoal tee with gold MILELE lettering and stars on the front",
+    back_image: "/products/kuja-kwa-yesu-tee-back.jpeg",
+    back_image_alt: "Charcoal tee with gold KUJA KWA YESU lettering on the back",
+  },
 ];
 
 function Icon({ name, size = 20 }) {

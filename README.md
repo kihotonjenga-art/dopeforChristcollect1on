@@ -2,8 +2,8 @@
 
 A React storefront backed by a small Django products API. The catalog currently
 uses demo product details and KES prices, alongside supplied Milele, Maombi,
-Maono, Eternal, and Visions tee photos; replace the remaining placeholders
-with the rest of the collection.
+Maono, Eternal, Visions, and Kuja Kwa Yesu tee photos; replace the remaining
+placeholders with the rest of the collection.
 
 Product cards can show both sides when a product has `image` and `back_image`
 URLs (with matching `image_alt` and `back_image_alt` descriptions). Product
