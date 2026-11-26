@@ -2,23 +2,27 @@ import { useEffect, useMemo, useState } from "react";
 
 const categories = ["All", "Tees", "Hoodies", "Bottoms"];
 const whatsappNumber = "254794933970";
+const standardSizes = ["S", "M", "L", "XL"];
+const sizeLabels = { S: "Small", M: "Medium", L: "Large", XL: "Extra Large" };
 const previewProducts = [
   {
     id: 1,
-    name: "Made New heavyweight tee",
+    name: "Milele graphic tee",
     category: "Tees",
-    price: 2400,
+    price: 1500,
+    sizes: standardSizes,
     badge: "Best seller",
-    image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=85",
-    image_alt: "Cream heavyweight t-shirt",
-    back_image: "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=900&q=85",
-    back_image_alt: "Demo back-view image for heavyweight tee",
+    image: "/products/milele-graphic-tee-front.jpeg",
+    image_alt: "White graphic tee with red MILELE lettering on the front",
+    back_image: "/products/milele-graphic-tee-back.jpeg",
+    back_image_alt: "White graphic tee with MAOMBI prayer illustration on the back",
   },
   {
     id: 2,
     name: "Walk by Faith hoodie",
     category: "Hoodies",
     price: 4800,
+    sizes: standardSizes,
     badge: "New drop",
     image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=900&q=85",
     image_alt: "Relaxed fit hoodie",
@@ -27,25 +31,39 @@ const previewProducts = [
   },
   {
     id: 3,
-    name: "Grace oversized tee",
+    name: "Maono graphic tee",
     category: "Tees",
-    price: 2200,
+    price: 1500,
+    sizes: standardSizes,
     badge: "",
-    image: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=900&q=85",
-    image_alt: "Minimal streetwear t-shirt",
-    back_image: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=900&q=85",
-    back_image_alt: "Demo back-view image for oversized tee",
+    image: "/products/maono-graphic-tee-front.jpeg",
+    image_alt: "Red graphic tee with white MAONO lettering",
+    back_image: "/products/maono-graphic-tee-back.jpeg",
+    back_image_alt: "Red graphic tee with KUJA KWA YESU KUNA URADI print on the back",
   },
   {
     id: 4,
-    name: "Kingdom cargo pants",
-    category: "Bottoms",
-    price: 3900,
-    badge: "Limited",
-    image: "https://images.unsplash.com/photo-1517438476312-10d79c077509?auto=format&fit=crop&w=900&q=85",
-    image_alt: "Relaxed utility trousers",
-    back_image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=900&q=85",
-    back_image_alt: "Demo back-view image for cargo pants",
+    name: "Eternal graphic tee",
+    category: "Tees",
+    price: 1500,
+    sizes: standardSizes,
+    badge: "New drop",
+    image: "/products/eternal-graphic-tee-front.jpeg",
+    image_alt: "White graphic tee with blue ETERNAL lettering on the front",
+    back_image: "/products/eternal-graphic-tee-back.jpeg",
+    back_image_alt: "White tee with blue He Was Brought to Earth to Give Us Eternal Life print on the back",
+  },
+  {
+    id: 5,
+    name: "Visions graphic tee",
+    category: "Tees",
+    price: 1500,
+    sizes: standardSizes,
+    badge: "New drop",
+    image: "/products/visions-graphic-tee-front.jpeg",
+    image_alt: "White graphic tee with black VISIONS lettering on the front",
+    back_image: "/products/visions-graphic-tee-back.jpeg",
+    back_image_alt: "White tee with Kenya, Nairobi, and Proverbs 29:18 print on the back",
   },
 ];
 
@@ -66,10 +84,15 @@ function Icon({ name, size = 20 }) {
   );
 }
 
+function formatSize(size) {
+  return `${sizeLabels[size] || size} (${size})`;
+}
+
 function App() {
   const [products, setProducts] = useState([]);
   const [activeCategory, setActiveCategory] = useState("All");
   const [cart, setCart] = useState({});
+  const [selectedSizes, setSelectedSizes] = useState({});
   const [cartOpen, setCartOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [usingPreview, setUsingPreview] = useState(false);
@@ -108,17 +131,35 @@ function App() {
     [activeCategory, products],
   );
   const cartItems = useMemo(
-    () => products
-      .filter((product) => cart[product.id])
-      .map((product) => ({ ...product, quantity: cart[product.id] })),
+    () => {
+      const productsById = new Map(products.map((product) => [String(product.id), product]));
+      return Object.entries(cart).flatMap(([key, quantity]) => {
+        const separator = key.lastIndexOf(":");
+        const product = productsById.get(key.slice(0, separator));
+        if (!product) return [];
+        return [{
+          ...product,
+          size: key.slice(separator + 1),
+          cartKey: key,
+          quantity,
+        }];
+      });
+    },
     [cart, products],
   );
   const cartCount = Object.values(cart).reduce((total, quantity) => total + quantity, 0);
   const cartTotal = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
 
   function addToBag(product) {
-    setCart((items) => ({ ...items, [product.id]: (items[product.id] || 0) + 1 }));
-    setNotice(`${product.name} added to your bag`);
+    const size = selectedSizes[product.id];
+    if (!size) {
+      setNotice(`Choose a size for ${product.name} first`);
+      window.setTimeout(() => setNotice(""), 2400);
+      return;
+    }
+    const key = `${product.id}:${size}`;
+    setCart((items) => ({ ...items, [key]: (items[key] || 0) + 1 }));
+    setNotice(`${product.name} (${size}) added to your bag`);
     window.setTimeout(() => setNotice(""), 2400);
   }
 
@@ -126,21 +167,21 @@ function App() {
     setFlippedProducts((flipped) => ({ ...flipped, [productId]: !flipped[productId] }));
   }
 
-  function changeQuantity(productId, amount) {
+  function changeQuantity(cartItemKey, amount) {
     setCart((items) => {
-      const quantity = (items[productId] || 0) + amount;
+      const quantity = (items[cartItemKey] || 0) + amount;
       if (quantity <= 0) {
         const nextItems = { ...items };
-        delete nextItems[productId];
+        delete nextItems[cartItemKey];
         return nextItems;
       }
-      return { ...items, [productId]: quantity };
+      return { ...items, [cartItemKey]: quantity };
     });
   }
 
   function getWhatsAppOrderUrl() {
     const lines = cartItems.map((item) =>
-      `${item.name} x${item.quantity} — KES ${(item.price * item.quantity).toLocaleString("en-KE")}`,
+      `${item.name} — Size: ${formatSize(item.size)} x${item.quantity} — KES ${(item.price * item.quantity).toLocaleString("en-KE")}`,
     );
     const message = [
       "Hello DopeForChrist Collection, I'd like to place this order:",
@@ -258,6 +299,23 @@ function App() {
                     <div><p className="product-category">{product.category}</p><h3>{product.name}</h3></div>
                     <p className="product-price">KES {product.price.toLocaleString("en-KE")}</p>
                   </div>
+                  <div className="size-picker">
+                    <span className="size-picker-label" id={`size-label-${product.id}`}>Choose size</span>
+                    <div className="size-options" role="group" aria-labelledby={`size-label-${product.id}`}>
+                      {(product.sizes?.length ? product.sizes : standardSizes).map((size) => (
+                        <button
+                          key={size}
+                          className={selectedSizes[product.id] === size ? "size-option selected" : "size-option"}
+                          type="button"
+                          aria-label={`${sizeLabels[size] || size} (${size})`}
+                          aria-pressed={selectedSizes[product.id] === size}
+                          onClick={() => setSelectedSizes((selected) => ({ ...selected, [product.id]: size }))}
+                        >
+                          {size}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </article>
               ))}
             </div>
@@ -296,19 +354,20 @@ function App() {
               <>
                 <div className="cart-items">
                   {cartItems.map((item) => (
-                    <article className="cart-item" key={item.id}>
+                    <article className="cart-item" key={item.cartKey}>
                       <img src={item.image} alt={item.image_alt} />
                       <div className="cart-item-details">
                         <p className="product-category">{item.category}</p>
                         <h3>{item.name}</h3>
+                        <p className="cart-item-size">Size: {formatSize(item.size)}</p>
                         <p className="cart-item-price">KES {(item.price * item.quantity).toLocaleString("en-KE")}</p>
-                        <div className="quantity-control" aria-label={`Quantity for ${item.name}`}>
-                          <button type="button" onClick={() => changeQuantity(item.id, -1)} aria-label={`Decrease ${item.name} quantity`}><Icon name="minus" size={15} /></button>
+                        <div className="quantity-control" aria-label={`Quantity for ${item.name}, size ${item.size}`}>
+                          <button type="button" onClick={() => changeQuantity(item.cartKey, -1)} aria-label={`Decrease ${item.name}, size ${item.size}`}><Icon name="minus" size={15} /></button>
                           <span>{item.quantity}</span>
-                          <button type="button" onClick={() => changeQuantity(item.id, 1)} aria-label={`Increase ${item.name} quantity`}><Icon name="plus" size={15} /></button>
+                          <button type="button" onClick={() => changeQuantity(item.cartKey, 1)} aria-label={`Increase ${item.name}, size ${item.size}`}><Icon name="plus" size={15} /></button>
                         </div>
                       </div>
-                      <button className="cart-remove" type="button" onClick={() => changeQuantity(item.id, -item.quantity)}>Remove</button>
+                      <button className="cart-remove" type="button" onClick={() => changeQuantity(item.cartKey, -item.quantity)} aria-label={`Remove ${item.name}, size ${item.size}`}>Remove</button>
                     </article>
                   ))}
                 </div>

@@ -106,6 +106,12 @@ button { cursor: pointer; }
 .product-category { color: #8b8880; text-transform: uppercase; font-size: 7px; letter-spacing: 1.1px; margin: 0 0 5px; }
 .product-info h3 { font: 600 12px var(--display); margin: 0; }
 .product-price { margin: 13px 0 0; flex-shrink: 0; font: 600 10px var(--display); }
+.size-picker { margin-top: 12px; display: flex; align-items: center; gap: 9px; }
+.size-picker-label { color: var(--muted); font-size: 8px; font-weight: 600; letter-spacing: .7px; text-transform: uppercase; }
+.size-options { display: flex; gap: 4px; }
+.size-option { min-width: 27px; height: 27px; padding: 0 5px; border: 1px solid var(--line); background: transparent; color: var(--ink); font-size: 9px; transition: background .2s, color .2s, border-color .2s; }
+.size-option:hover, .size-option.selected { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+.size-option:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
 .catalog-message { min-height: 200px; display: grid; place-items: center; color: var(--muted); font-size: 12px; }
 .error-message { text-align: center; padding: 24px; line-height: 1.7; color: #a63e2a; }
 .loading-dots { color: var(--orange); }
@@ -146,6 +152,7 @@ button { cursor: pointer; }
 .cart-item > img { display: block; width: 90px; height: 112px; object-fit: cover; background: #e5e0d7; }
 .cart-item-details { min-width: 0; }
 .cart-item-details h3 { margin: 5px 0 7px; font: 600 13px var(--display); }
+.cart-item-size { margin: 0 0 6px; color: var(--muted); font-size: 10px; }
 .cart-item-price { margin: 0; font: 600 11px var(--display); }
 .quantity-control { width: fit-content; display: flex; align-items: center; gap: 12px; margin-top: 13px; border: 1px solid var(--line); }
 .quantity-control button { width: 29px; height: 27px; display: grid; place-items: center; border: 0; background: transparent; }
@@ -217,6 +224,10 @@ button { cursor: pointer; }
   .product-category { font-size: 6px; }
   .product-info h3 { font-size: 10px; }
   .product-price { margin: 2px 0 0; font-size: 9px; }
+  .size-picker { gap: 6px; margin-top: 8px; }
+  .size-picker-label { font-size: 7px; }
+  .size-options { gap: 3px; }
+  .size-option { min-width: 24px; height: 24px; padding: 0 4px; font-size: 8px; }
   .collection-footnote { margin-top: 28px; font-size: 8px; text-align: center; }
   .story { grid-template-columns: 1fr; }
   .story-image-wrap { min-height: 355px; height: 355px; }

@@ -1,14 +1,19 @@
 # DopeForChrist Collection
 
 A React storefront backed by a small Django products API. The catalog currently
-uses demo product names, images, and KES prices; replace these with the real
-collection details when they are ready.
+uses demo product details and KES prices, alongside supplied Milele, Maono,
+Visions, and Eternal tee photos; replace the remaining placeholders with the
+rest of the collection.
 
 Product cards can show both sides when a product has `image` and `back_image`
-URLs (with matching `image_alt` and `back_image_alt` descriptions). Replace the
-demo image URLs in `backend/config/views.py` and `frontend/src/App.jsx` with each
-garment's front and back photos; the card's **See back** control flips between
-them.
+URLs (with matching `image_alt` and `back_image_alt` descriptions). Product
+details are in `backend/config/views.py` and `frontend/src/App.jsx`; frontend
+images can be stored under `frontend/public/` and referenced by their root URL.
+The card's **See back** control flips between the images.
+
+Choose a size (S, M, L, or XL) on a product card before adding it to the bag.
+The cart keeps separate entries for different sizes and includes each size in
+the WhatsApp order message.
 
 ## Run locally
 
