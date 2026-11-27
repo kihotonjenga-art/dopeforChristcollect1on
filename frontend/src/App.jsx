@@ -21,13 +21,12 @@ const previewProducts = [
     id: 2,
     name: "Walk by Faith hoodie",
     category: "Hoodies",
-    price: 4800,
-    sizes: standardSizes,
-    badge: "New drop",
-    image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=900&q=85",
-    image_alt: "Relaxed fit hoodie",
-    back_image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=900&q=85",
-    back_image_alt: "Demo back-view image for hoodie",
+    price: null,
+    sizes: [],
+    coming_soon: true,
+    badge: "Coming Soon",
+    image: "/products/hoodie-coming-soon.jpeg",
+    image_alt: "Coming soon announcement for the hoodie",
   },
   {
     id: 3,
@@ -100,6 +99,17 @@ const previewProducts = [
     image_alt: "Charcoal tee with gold MILELE lettering and stars on the front",
     back_image: "/products/kuja-kwa-yesu-tee-back.jpeg",
     back_image_alt: "Charcoal tee with gold KUJA KWA YESU lettering on the back",
+  },
+  {
+    id: 9,
+    name: "Bottoms",
+    category: "Bottoms",
+    price: null,
+    sizes: [],
+    coming_soon: true,
+    badge: "Coming Soon",
+    image: "/products/hoodie-coming-soon.jpeg",
+    image_alt: "Coming soon announcement for bottoms",
   },
 ];
 
@@ -187,6 +197,7 @@ function App() {
   const cartTotal = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
 
   function addToBag(product) {
+    if (product.coming_soon || product.price == null) return;
     const size = selectedSizes[product.id];
     if (!size) {
       setNotice(`Choose a size for ${product.name} first`);
@@ -326,32 +337,36 @@ function App() {
                         {flippedProducts[product.id] ? "See front" : "See back"}
                       </button>
                     )}
-                    <button className="quick-add" type="button" onClick={() => addToBag(product)} aria-label={`Add ${product.name} to bag`}>
-                      <Icon name="plus" size={19} />
-                    </button>
+                    {!product.coming_soon && (
+                      <button className="quick-add" type="button" onClick={() => addToBag(product)} aria-label={`Add ${product.name} to bag`}>
+                        <Icon name="plus" size={19} />
+                      </button>
+                    )}
                     <span className="product-number">0{index + 1}</span>
                   </div>
                   <div className="product-info">
                     <div><p className="product-category">{product.category}</p><h3>{product.name}</h3></div>
-                    <p className="product-price">KES {product.price.toLocaleString("en-KE")}</p>
+                    {product.price != null && <p className="product-price">KES {product.price.toLocaleString("en-KE")}</p>}
                   </div>
-                  <div className="size-picker">
-                    <span className="size-picker-label" id={`size-label-${product.id}`}>Choose size</span>
-                    <div className="size-options" role="group" aria-labelledby={`size-label-${product.id}`}>
-                      {(product.sizes?.length ? product.sizes : standardSizes).map((size) => (
-                        <button
-                          key={size}
-                          className={selectedSizes[product.id] === size ? "size-option selected" : "size-option"}
-                          type="button"
-                          aria-label={`${sizeLabels[size] || size} (${size})`}
-                          aria-pressed={selectedSizes[product.id] === size}
-                          onClick={() => setSelectedSizes((selected) => ({ ...selected, [product.id]: size }))}
-                        >
-                          {size}
-                        </button>
-                      ))}
+                  {!product.coming_soon && (
+                    <div className="size-picker">
+                      <span className="size-picker-label" id={`size-label-${product.id}`}>Choose size</span>
+                      <div className="size-options" role="group" aria-labelledby={`size-label-${product.id}`}>
+                        {(product.sizes?.length ? product.sizes : standardSizes).map((size) => (
+                          <button
+                            key={size}
+                            className={selectedSizes[product.id] === size ? "size-option selected" : "size-option"}
+                            type="button"
+                            aria-label={`${sizeLabels[size] || size} (${size})`}
+                            aria-pressed={selectedSizes[product.id] === size}
+                            onClick={() => setSelectedSizes((selected) => ({ ...selected, [product.id]: size }))}
+                          >
+                            {size}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </article>
               ))}
             </div>
